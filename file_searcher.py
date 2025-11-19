@@ -21,19 +21,26 @@ def search_files(directory, output_file):
     print(f"Outputting to: {output_file}")
 
     try:
+        # First, collect all file paths
+        file_paths = []
+        for root, _, files in os.walk(directory_path):
+            for file in files:
+                full_path = os.path.join(root, file)
+                file_paths.append(full_path)
+        
+        # Sort file paths alphabetically
+        file_paths.sort()
+        
+        # Write sorted paths to CSV
         with open(output_file, mode='w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['File Path'])  # Header
 
-            file_count = 0
-            for root, _, files in os.walk(directory_path):
-                for file in files:
-                    full_path = os.path.join(root, file)
-                    print(f"Found: {full_path}")
-                    writer.writerow([full_path])
-                    file_count += 1
+            for full_path in file_paths:
+                print(f"Found: {full_path}")
+                writer.writerow([full_path])
             
-            print(f"Successfully saved {file_count} file paths to '{output_file}'.")
+            print(f"Successfully saved {len(file_paths)} file paths to '{output_file}'.")
 
     except PermissionError:
         print(f"Error: Permission denied when writing to '{output_file}'.")
