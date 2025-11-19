@@ -21,26 +21,38 @@ def search_files(directory, output_file):
     print(f"Outputting to: {output_file}")
 
     try:
-        # First, collect all file paths
-        file_paths = []
+        # First pass: collect all directories
+        directories = []
         for root, _, files in os.walk(directory_path):
-            for file in files:
-                full_path = os.path.join(root, file)
-                file_paths.append(full_path)
+            if files:  # Only include directories that have files
+                directories.append(root)
         
-        # Sort file paths alphabetically
-        file_paths.sort()
+        # Sort directories
+        directories.sort()
         
-        # Write sorted paths to CSV
+        # Second pass: process each directory and write files directly to CSV
+        file_count = 0
         with open(output_file, mode='w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['File Path'])  # Header
-
-            for full_path in file_paths:
-                print(f"Found: {full_path}")
-                writer.writerow([full_path])
             
-            print(f"Successfully saved {len(file_paths)} file paths to '{output_file}'.")
+            for directory in directories:
+                # Get files in this directory only (not subdirectories)
+                try:
+                    files = sorted([f for f in os.listdir(directory) 
+                                   if os.path.isfile(os.path.join(directory, f))])
+                    
+                    for file in files:
+                        full_path = os.path.join(directory, file)
+                        print(f"Found: {full_path}")
+                        writer.writerow([full_path])
+                        file_count += 1
+                        
+                except PermissionError:
+                    print(f"Warning: Permission denied for directory '{directory}'")
+                    continue
+            
+            print(f"Successfully saved {file_count} file paths to '{output_file}'.")
 
     except PermissionError:
         print(f"Error: Permission denied when writing to '{output_file}'.")
