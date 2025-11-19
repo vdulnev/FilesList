@@ -29,6 +29,7 @@ def search_files(directory, output_file):
             for root, _, files in os.walk(directory_path):
                 for file in files:
                     full_path = os.path.join(root, file)
+                    print(f"Found: {full_path}")
                     writer.writerow([full_path])
                     file_count += 1
             
