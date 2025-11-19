@@ -1,11 +1,11 @@
 import os
-import csv
+import json
 import argparse
 from pathlib import Path
 
 def search_files(directory, output_file):
     """
-    Recursively searches for files in the given directory and saves their absolute paths to a CSV file.
+    Recursively searches for files in the given directory and saves their absolute paths to a JSON file.
     """
     directory_path = Path(directory).resolve()
     
@@ -30,29 +30,29 @@ def search_files(directory, output_file):
         # Sort directories
         directories.sort()
         
-        # Second pass: process each directory and write files directly to CSV
-        file_count = 0
-        with open(output_file, mode='w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['File Path'])  # Header
-            
-            for directory in directories:
-                # Get files in this directory only (not subdirectories)
-                try:
-                    files = sorted([f for f in os.listdir(directory) 
-                                   if os.path.isfile(os.path.join(directory, f))])
+        # Second pass: process each directory and collect file paths
+        file_paths = []
+        
+        for directory in directories:
+            # Get files in this directory only (not subdirectories)
+            try:
+                files = sorted([f for f in os.listdir(directory) 
+                               if os.path.isfile(os.path.join(directory, f))])
+                
+                for file in files:
+                    full_path = os.path.join(directory, file)
+                    print(f"Found: {full_path}")
+                    file_paths.append(full_path)
                     
-                    for file in files:
-                        full_path = os.path.join(directory, file)
-                        print(f"Found: {full_path}")
-                        writer.writerow([full_path])
-                        file_count += 1
-                        
-                except PermissionError:
-                    print(f"Warning: Permission denied for directory '{directory}'")
-                    continue
-            
-            print(f"Successfully saved {file_count} file paths to '{output_file}'.")
+            except PermissionError:
+                print(f"Warning: Permission denied for directory '{directory}'")
+                continue
+        
+        # Write to JSON file
+        with open(output_file, mode='w', encoding='utf-8') as jsonfile:
+            json.dump(file_paths, jsonfile, ensure_ascii=False, indent=2)
+        
+        print(f"Successfully saved {len(file_paths)} file paths to '{output_file}'.")
 
     except PermissionError:
         print(f"Error: Permission denied when writing to '{output_file}'.")
@@ -60,9 +60,9 @@ def search_files(directory, output_file):
         print(f"An unexpected error occurred: {e}")
 
 def main():
-    parser = argparse.ArgumentParser(description="Recursively search a folder and save full paths of files to a CSV file.")
+    parser = argparse.ArgumentParser(description="Recursively search a folder and save full paths of files to a JSON file.")
     parser.add_argument("directory", nargs='?', default=".", help="The directory to search recursively (default: current directory).")
-    parser.add_argument("-o", "--output", default="file_paths.csv", help="The output CSV file name (default: file_paths.csv).")
+    parser.add_argument("-o", "--output", default="file_paths.json", help="The output JSON file name (default: file_paths.json).")
 
     args = parser.parse_args()
 
