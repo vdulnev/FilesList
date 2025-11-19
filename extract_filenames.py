@@ -1,9 +1,9 @@
 import xml.etree.ElementTree as ET
-import csv
+import json
 
-def extract_filenames_to_csv(xml_file, csv_file):
+def extract_filenames_to_json(xml_file, json_file):
     """
-    Extract filename fields from lib.xml and write to CSV file, sorted alphabetically.
+    Extract filename fields from lib.xml and write to JSON file, sorted alphabetically.
     """
     filenames = []
     
@@ -39,16 +39,13 @@ def extract_filenames_to_csv(xml_file, csv_file):
     # Sort filenames alphabetically (case-insensitive)
     filenames.sort(key=str.lower)
     
-    print(f"Writing to {csv_file}...")
+    print(f"Writing to {json_file}...")
     
-    # Write to CSV file
-    with open(csv_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Filename'])  # Header
-        for filename in filenames:
-            writer.writerow([filename])
+    # Write to JSON file
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(filenames, f, ensure_ascii=False, indent=2)
     
-    print(f"Done! {len(filenames)} filenames written to {csv_file}")
+    print(f"Done! {len(filenames)} filenames written to {json_file}")
 
 if __name__ == '__main__':
-    extract_filenames_to_csv('lib.xml', 'lib.csv')
+    extract_filenames_to_json('lib.xml', 'lib.json')
