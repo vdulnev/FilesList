@@ -41,7 +41,7 @@ def search_files(directory, output_file):
 
 def main():
     parser = argparse.ArgumentParser(description="Recursively search a folder and save full paths of files to a CSV file.")
-    parser.add_argument("directory", help="The directory to search recursively.")
+    parser.add_argument("directory", nargs='?', default=".", help="The directory to search recursively (default: current directory).")
     parser.add_argument("-o", "--output", default="file_paths.csv", help="The output CSV file name (default: file_paths.csv).")
 
     args = parser.parse_args()
